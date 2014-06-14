@@ -1,187 +1,255 @@
 __author__ = 'pok'
 
 
-def swap(array, a, b):
+def _swap(array, a, b):
     """
         Swap two elements which indexes are a and b from array.
     """
 
-    if a != b:
+    if len(array) and a != b:
         tmp = array[a]
         array[a] = array[b]
         array[b] = tmp
 
 
-def bubble_sort(array, r=False):
+def _tran_collection(obj, key):
+    """
+        t=Transform the map/dict obj to an sortable list.
+        If key equals 0, sorted at dict's keys,
+        else if key equals 1 , sorted at dist's values.
+    """
+    keys = []
+    array = []
+    if type(obj) == list:
+        array = obj[:]
+    elif type(obj) == dict:
+        if key == 1:
+            array = list(obj.values())
+            keys = list(obj)
+        elif key == 0:
+            keys = list(obj.values())
+            array = list(obj)
+    return keys, array
+
+
+def bubble_sort(coll, key=1, r=False):
     """
         Sorting the array via bubble algorithm.
         While r=FALSE, ascending sorted,
         else descending sorted.
     """
-
+    _keys, _values = _tran_collection(coll, key)
     # ascending sort.
     if not r:
-        for i in range(len(array)):
-            for j in range(len(array) - i - 1):
-                if array[j] > array[j + 1]:
-                    swap(array, j, j + 1)
+        for i in range(len(_values)):
+            for j in range(len(_values) - i - 1):
+                if _values[j] > _values[j + 1]:
+                    _swap(_values, j, j + 1)
+                    _swap(_keys, j, j + 1)
     #descending sort.
     else:
-        for i in range(len(array)):
-            for j in range(len(array) - i - 1):
-                if array[j] < array[j + 1]:
-                    swap(array, j, j + 1)
-    return array
+        for i in range(len(_values)):
+            for j in range(len(_values) - i - 1):
+                if _values[j] < _values[j + 1]:
+                    _swap(_values, j, j + 1)
+                    _swap(_keys, j, j + 1)
+    if len(_keys) and key == 0:
+        return _keys, _values
+    elif len(_keys) and key == 1:
+        return _values, _keys
+    else:
+        return _values
 
 
-def select_sort(array, r=False):
+def select_sort(coll, key=1, r=False):
     """
         Sorting the array via selection algorithm.
         While r=FALSE, ascending sorted,
         else descending sorted.
     """
 
+    _keys, _values = _tran_collection(coll, key)
     # ascending sort.
     if not r:
-        for i in range(len(array)):
-            _min = array[i]
+        for i in range(len(_values)):
+            _min = _values[i]
             _index = i
-            for j in range(i + 1, len(array)):
-                if _min > array[j]:
-                    _min = array[j]
+            for j in range(i + 1, len(_values)):
+                if _min > _values[j]:
+                    _min = _values[j]
                     _index = j
-            swap(array, i, _index)
+            _swap(_values, i, _index)
+            _swap(_keys, i, _index)
     # descending sort.
     else:
-        for i in range(len(array)):
-            _max = array[i]
+        for i in range(len(_values)):
+            _max = _values[i]
             _index = i
-            for j in range(i + 1, len(array)):
-                if _max < array[j]:
-                    _max = array[j]
+            for j in range(i + 1, len(_values)):
+                if _max < _values[j]:
+                    _max = _values[j]
                     _index = j
-            swap(array, i, _index)
-    return array
+            _swap(_values, i, _index)
+            _swap(_keys, i, _index)
+    if len(_keys) and key == 0:
+        return _keys, _values
+    elif len(_keys) and key == 1:
+        return _values, _keys
+    else:
+        return _values
 
 
-def insert_sort(array, r=False):
+def insert_sort(coll, key=1, r=False):
     """
         Sorting the array via insert algorithm.
         While r=FALSE, ascending sorted,
         else descending sorted.
     """
-
+    _keys, _values = _tran_collection(coll, key)
     # ascending sort.
     if not r:
-        for i in range(len(array)):
+        for i in range(len(_values)):
             for j in range(0, i):
-                if array[j] > array[i]:
+                if _values[j] > _values[i]:
                     for k in range(i, j, -1):
-                        swap(array, k, k - 1)
+                        _swap(_values, k, k - 1)
+                        _swap(_keys, k, k - 1)
     # descending sort.
     else:
-        for i in range(len(array)):
+        for i in range(len(_values)):
             for j in range(0, i):
-                if array[j] < array[i]:
+                if _values[j] < _values[i]:
                     for k in range(i, j, -1):
-                        swap(array, k, k - 1)
-    return array
+                        _swap(_values, k, k - 1)
+                        _swap(_keys, k, k - 1)
+    if len(_keys) and key == 0:
+        return _keys, _values
+    elif len(_keys) and key == 1:
+        return _values, _keys
+    else:
+        return _values
 
 
-def merge_sort(array, r=False):
+def merge_sort(coll, key=1, r=False):
     """
         Sorting the array via merge algorithm.
         While r=FALSE, ascending sorted,
         else descending sorted.
     """
 
+    _keys, _values = _tran_collection(coll, key)
+
     # merge
-    def merge(array, s, e):
+    def _merge(s, e):
         if e - s == 1:
             return
         elif e == s:
             return
         else:
             mid = (s + e) / 2
-            merge(array, s, mid)
-            sort(array, s, mid)
-            merge(array, mid + 1, e)
-            sort(array, mid + 1, e)
+            _merge(s, mid)
+            _sort(s, mid)
+            _merge(mid + 1, e)
+            _sort(mid + 1, e)
 
     # sort
-    def sort(array, s, e):
-        tmp = []
+    def _sort(s, e):
+        tmp_values = []
+        tmp_keys = []
         mid = (s + e) / 2
         i = s
         j = mid + 1
         while i <= mid and j <= e:
             if not r:
-                if array[i] < array[j]:
-                    tmp.append(array[i])
+                if _values[i] < _values[j]:
+                    tmp_values.append(_values[i])
+                    if len(_keys): tmp_keys.append(_keys[i])
                     i += 1
                 else:
-                    tmp.append(array[j])
+                    tmp_values.append(_values[j])
+                    if len(_keys): tmp_keys.append(_keys[j])
                     j += 1
             else:
-                if array[i] > array[j]:
-                    tmp.append(array[i])
+                if _values[i] > _values[j]:
+                    tmp_values.append(_values[i])
+                    if len(_keys): tmp_keys.append(_keys[i])
                     i += 1
                 else:
-                    tmp.append(array[j])
+                    tmp_values.append(_values[j])
+                    if len(_keys): tmp_keys.append(_keys[j])
                     j += 1
         if i <= mid:
             for k in range(i, mid + 1):
-                tmp.append(array[k])
+                tmp_values.append(_values[k])
+                if len(_keys): tmp_keys.append(_keys[k])
         if j <= e:
             for k in range(j, e + 1):
-                tmp.append(array[k])
+                tmp_values.append(_values[k])
+                if len(_keys): tmp_keys.append(_keys[k])
         for i in range(s, e + 1):
-            array[i] = tmp[i - s]
+            _values[i] = tmp_values[i - s]
+            if len(_keys): _keys[i] = tmp_keys[i - s]
 
-    if len(array) > 0:
-        merge(array, 0, len(array) - 1)
-        sort(array, 0, len(array) - 1)
-    return array
+    if len(_values) > 0:
+        _merge(0, len(_values) - 1)
+        _sort(0, len(_values) - 1)
+    if len(_keys) and key == 0:
+        return _keys, _values
+    elif len(_keys) and key == 1:
+        return _values, _keys
+    else:
+        return _values
 
 
-def quick_sort(array, r=False):
+def quick_sort(coll, key=1, r=False):
     """
         Sorting the array via qucik sort algorithm.
         While r=FALSE, ascending sorted,
         else descending sorted.
     """
 
+    _keys, _values = _tran_collection(coll, key)
+
     #quick sort recursion function.
-    def q(array, b, e):
+    def _quick_sort(b, e):
         if b >= e:
             return
         else:
-            mid = partition(array, b, e)
-            q(array, b, mid - 1)
-            q(array, mid + 1, e)
+            mid = _partition(b, e)
+            _quick_sort(b, mid - 1)
+            _quick_sort(mid + 1, e)
 
     #partition function.
-    def partition(array, b, e):
-        key = array[b]
+    def _partition(b, e):
+        _partition_value = _values[b]
         while b < e:
             if not r:
-                while key <= array[e] and b < e:
+                while _partition_value <= _values[e] and b < e:
                     e -= 1
-                swap(array, b, e)
-                while key >= array[b] and b < e:
+                _swap(_values, b, e)
+                _swap(_keys, b, e)
+                while _partition_value >= _values[b] and b < e:
                     b += 1
-                swap(array, b, e)
+                _swap(_values, b, e)
+                _swap(_keys, b, e)
             else:
-                while key >= array[e] and b < e:
+                while _partition_value >= _values[e] and b < e:
                     e -= 1
-                swap(array, b, e)
-                while key <= array[b] and b < e:
+                _swap(_values, b, e)
+                _swap(_keys, b, e)
+                while _partition_value <= _values[b] and b < e:
                     b += 1
-                swap(array, b, e)
+                _swap(_values, b, e)
+                _swap(_keys, b, e)
         return b
 
-    q(array, 0, len(array) - 1)
-    return array
+    _quick_sort(0, len(_values) - 1)
+    if len(_keys) and key == 0:
+        return _keys, _values
+    elif len(_keys) and key == 1:
+        return _values, _keys
+    else:
+        return _values
 
 
 def unit_test():
@@ -191,10 +259,14 @@ def unit_test():
     a4 = [1, 1, 2, 2, 3]
     a5 = []
     a6 = [1, 5, 2, 3]
-    array = [a1, a2, a3, a4, a5, a6]
+    d1 = {'a': '1', 'b': '2', 'c': '3'}
+    d2 = {'c': 3, 'b': 2, 'a': 1}
+    d3 = {}
+    d4 = {'b': 2, 'c': 3, 'a': 1}
+    array = [a1, a2, a3, a4, a5, a6, d1, d2, d3, d4]
     for i in array:
-        print merge_sort(i)
-        print merge_sort(i, True)
+        print quick_sort(i)
+        print quick_sort(i, r=True)
 
 
 if __name__ == '__main__':
