@@ -12,23 +12,24 @@ def _swap(array, a, b):
         array[b] = tmp
 
 
-def _tran_collection(obj, key):
+def _tran_collection(coll, key):
     """
         t=Transform the map/dict obj to an sortable list.
         If key equals 0, sorted at dict's keys,
         else if key equals 1 , sorted at dist's values.
     """
+
     keys = []
     array = []
-    if type(obj) == list:
-        array = obj[:]
-    elif type(obj) == dict:
+    if type(coll) == list:
+        array = coll[:]
+    elif type(coll) == dict:
         if key == 1:
-            array = list(obj.values())
-            keys = list(obj)
+            array = list(coll.values())
+            keys = list(coll)
         elif key == 0:
-            keys = list(obj.values())
-            array = list(obj)
+            keys = list(coll.values())
+            array = list(coll)
     return keys, array
 
 
@@ -38,7 +39,9 @@ def bubble_sort(coll, key=1, r=False):
         While r=FALSE, ascending sorted,
         else descending sorted.
     """
+
     _keys, _values = _tran_collection(coll, key)
+
     # ascending sort.
     if not r:
         for i in range(len(_values)):
@@ -53,9 +56,9 @@ def bubble_sort(coll, key=1, r=False):
                 if _values[j] < _values[j + 1]:
                     _swap(_values, j, j + 1)
                     _swap(_keys, j, j + 1)
-    if len(_keys) and key == 0:
+    if len(_keys) and key == 1:
         return _keys, _values
-    elif len(_keys) and key == 1:
+    elif len(_keys) and key == 0:
         return _values, _keys
     else:
         return _values
@@ -69,6 +72,7 @@ def select_sort(coll, key=1, r=False):
     """
 
     _keys, _values = _tran_collection(coll, key)
+
     # ascending sort.
     if not r:
         for i in range(len(_values)):
@@ -91,9 +95,9 @@ def select_sort(coll, key=1, r=False):
                     _index = j
             _swap(_values, i, _index)
             _swap(_keys, i, _index)
-    if len(_keys) and key == 0:
+    if len(_keys) and key == 1:
         return _keys, _values
-    elif len(_keys) and key == 1:
+    elif len(_keys) and key == 0:
         return _values, _keys
     else:
         return _values
@@ -105,7 +109,9 @@ def insert_sort(coll, key=1, r=False):
         While r=FALSE, ascending sorted,
         else descending sorted.
     """
+
     _keys, _values = _tran_collection(coll, key)
+
     # ascending sort.
     if not r:
         for i in range(len(_values)):
@@ -122,9 +128,9 @@ def insert_sort(coll, key=1, r=False):
                     for k in range(i, j, -1):
                         _swap(_values, k, k - 1)
                         _swap(_keys, k, k - 1)
-    if len(_keys) and key == 0:
+    if len(_keys) and key == 1:
         return _keys, _values
-    elif len(_keys) and key == 1:
+    elif len(_keys) and key == 0:
         return _values, _keys
     else:
         return _values
@@ -193,9 +199,9 @@ def merge_sort(coll, key=1, r=False):
     if len(_values) > 0:
         _merge(0, len(_values) - 1)
         _sort(0, len(_values) - 1)
-    if len(_keys) and key == 0:
+    if len(_keys) and key == 1:
         return _keys, _values
-    elif len(_keys) and key == 1:
+    elif len(_keys) and key == 0:
         return _values, _keys
     else:
         return _values
@@ -244,9 +250,9 @@ def quick_sort(coll, key=1, r=False):
         return b
 
     _quick_sort(0, len(_values) - 1)
-    if len(_keys) and key == 0:
+    if len(_keys) and key == 1:
         return _keys, _values
-    elif len(_keys) and key == 1:
+    elif len(_keys) and key == 0:
         return _values, _keys
     else:
         return _values
@@ -263,7 +269,8 @@ def unit_test():
     d2 = {'c': 3, 'b': 2, 'a': 1}
     d3 = {}
     d4 = {'b': 2, 'c': 3, 'a': 1}
-    array = [a1, a2, a3, a4, a5, a6, d1, d2, d3, d4]
+    d5 = {'a': 3, 'b': 2, 'c': 1}
+    array = [a1, a2, a3, a4, a5, a6, d1, d2, d3, d4, d5]
     for i in array:
         print quick_sort(i)
         print quick_sort(i, r=True)
