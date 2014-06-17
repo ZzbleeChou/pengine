@@ -23,7 +23,17 @@ def pearson(coll_a, coll_b):
             a_b += (coll_a[i] - ave_a) * (coll_b[i] - ave_b)
             a += math.pow(coll_a[i] - ave_a, 2.0)
             b += math.pow(coll_b[i] - ave_b, 2.0)
-        return a_b / (math.sqrt(a) * math.sqrt(b)+1)
+        return a_b / (math.sqrt(a) * math.sqrt(b) + 1)
+
+
+def adjust_cos(coll_a, coll_b):
+    """
+    Compute the adjusted cosine of the collection.
+    :param coll_a:
+    :param coll_b:
+    """
+
+    return pearson(coll_a, coll_b)
 
 
 def average(coll):

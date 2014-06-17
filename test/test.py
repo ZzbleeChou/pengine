@@ -1,9 +1,15 @@
 __author__ = 'pok'
-import sys
+import sys, time
 
 sys.path.append("../rec/")
 
 from rec.rec import user_cf
+from rec.rec import item_cf
 
+# b = time.time()
+# print user_cf("./u1.base")
+# print time.time() - b
 
-print user_cf("./u1.base")
+b = time.time()
+print item_cf("./u1.base")
+print time.time() - b
