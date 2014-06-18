@@ -103,8 +103,8 @@ def item_cf(file_path, n=-1):
     for i in item_list:
         item_sim[i] = {}
     for i in range(len(item_list)):
+        item_i = item_list[i]
         for j in range(i, len(item_list)):
-            item_i = item_list[i]
             item_j = item_list[j]
             rate_i, rate_j = data_model.get_item_union(item_i, item_j)
             acos = adjust_cos(rate_i, rate_j)
@@ -139,7 +139,6 @@ def item_cf(file_path, n=-1):
     return rec
 
 
-#Time spending exception.
 def slope_one(file_path, n=-1):
     """
     Making recommendation via slope one.
@@ -159,21 +158,29 @@ def slope_one(file_path, n=-1):
     user_list = list(data_model.get_user_list())
 
     #compute dev(i,j)
-    dev = [[(0.0, 0.0)] * len(item_list) for row in range(len(item_list))]
+    dev = {}
+    tmp = {}
+    for i in item_list:
+        tmp[i] = (0.0, 0)
+    for i in item_list:
+        dev[i] = tmp
     for i in range(len(item_list)):
         rate_i = data_model.get_item_vec(item_list[i])
         if rate_i and len(rate_i) > 0:
             for j in range(i, len(item_list)):
                 if i != j:
                     rate_j = data_model.get_item_vec(item_list[j])
-                    dev_ij = 0.0
-                    dev_count = 0
-                    for ui in rate_i:
-                        if ui in rate_j:
-                            dev_ij += rate_i[ui] - rate_j[ui]
-                            dev_count += 1
-                    dev[i][j] = (dev_ij, dev_count)
-                    dev[j][i] = (dev_ij, dev_count)
+                    if rate_j and len(rate_j) > 0:
+                        dev_ij = 0.0
+                        dev_count = 0
+                        for iu in rate_i:
+                            if iu in rate_j:
+                                dev_ij += rate_i[iu] - rate_j[iu]
+                                dev_count += 1
+                        if dev_count > 0:
+                            dev_ij /= dev_count
+                            dev[item_list[i]][item_list[j]] = (dev_ij, dev_count)
+                            dev[item_list[j]][item_list[i]] = (dev_ij, dev_count)
 
     #make rec
     rec = {}
@@ -185,9 +192,10 @@ def slope_one(file_path, n=-1):
             if i not in rate_u:
                 pred = 0.0
                 count = 0.0
-                for ui in rate_u:
-                    dev_ij, dev_count = dev[item_list.index(i)][item_list.index(ui)]
-                    pred += (rate_u.get(ui) - dev_ij) * dev_count
+                i_dev = dev.get(i)
+                for iu in rate_u:
+                    dev_ij, dev_count = i_dev[iu]
+                    pred += (rate_u.get(iu) - dev_ij) * dev_count
                     count += dev_count
                 if count > 0:
                     rec_u[i] = pred / count
