@@ -8,11 +8,11 @@ from similarity import adjust_cos
 from sort import quick_sort
 
 
-def user_cf(file_path, k=100, n=100):
+def user_cf(file_path, k=100, n=-1):
     """
     Making recommendation via user_cf.
     :param k use for set the length of similar user set.
-    :param n use for top-n rec, default is 10, while n equals -1 show all recommended result .
+    :param n use for top-n rec, default is -1, while n equals -1 show all recommended result .
     """
 
     if n == 0:
@@ -43,7 +43,7 @@ def user_cf(file_path, k=100, n=100):
     for u in similarity_set:
         rate_u = data_model.get_user_vec(u)
         rec_par = {}
-        tmp_rec = {}
+        rec_u = {}
         tmp_set = similarity_set.get(u)
         for su in tmp_set:
             rate_su = data_model.get_user_vec(su)
@@ -66,25 +66,24 @@ def user_cf(file_path, k=100, n=100):
                 fenzi += (su_rate - avg_su) * simi
                 fenmu += simi
             fenmu += 1
-            tmp_rec[item] = avg_item + fenzi / fenmu
+            rec_u[item] = avg_item + fenzi / fenmu
 
-        items, pred = quick_sort(tmp_rec, r=True)
-        tmp_rec = {}
-        if n == -1:
-            n = len(items)
-        for i in range(n):
-            tmp_rec[items[i]] = pred[i]
-        rec[u] = tmp_rec
+        if n != -1:
+            items, pred = quick_sort(rec_u, r=True)
+            rec_u = {}
+            for i in range(n):
+                rec_u[items[i]] = pred[i]
+        rec[u] = rec_u
     return rec
 
 
-def item_cf(file_path, n=100):
+def item_cf(file_path, n=-1):
     """
     Making recommendation via item_cf.
     This function try to return a recommendation like:
     rec={
-        item:{
-            item:similarity
+        user:{
+            item:pred
         }
     }
     """
@@ -131,11 +130,73 @@ def item_cf(file_path, n=100):
                     rec_u[i] = fenzi / fenmu
                 else:
                     rec_u[i] = 0.0
-        items, pred = quick_sort(rec_u, r=True)
+        if n != -1:
+            items, pred = quick_sort(rec_u, r=True)
+            rec_u = {}
+            for i in range(n):
+                rec_u[items[i]] = pred[i]
+        rec[u] = rec_u
+    return rec
+
+
+#Time spending exception.
+def slope_one(file_path, n=-1):
+    """
+    Making recommendation via slope one.
+    This function try to return a recommendation like:
+    rec={
+        user:{
+            item:pred
+        }
+    }
+    """
+
+    #load data model
+    data_model = RecDataModel(file_path)
+    data_model.load_user_model()
+    data_model.load_item_model()
+    item_list = list(data_model.get_item_list())
+    user_list = list(data_model.get_user_list())
+
+    #compute dev(i,j)
+    dev = [[(0.0, 0.0)] * len(item_list) for row in range(len(item_list))]
+    for i in range(len(item_list)):
+        rate_i = data_model.get_item_vec(item_list[i])
+        if rate_i and len(rate_i) > 0:
+            for j in range(i, len(item_list)):
+                if i != j:
+                    rate_j = data_model.get_item_vec(item_list[j])
+                    dev_ij = 0.0
+                    dev_count = 0
+                    for ui in rate_i:
+                        if ui in rate_j:
+                            dev_ij += rate_i[ui] - rate_j[ui]
+                            dev_count += 1
+                    dev[i][j] = (dev_ij, dev_count)
+                    dev[j][i] = (dev_ij, dev_count)
+
+    #make rec
+    rec = {}
+    for u in user_list:
+        print u
+        rate_u = data_model.get_user_vec(u)
         rec_u = {}
-        if n == -1:
-            n = len(items)
-        for i in range(n):
-            rec_u[items[i]] = pred[i]
+        for i in item_list:
+            if i not in rate_u:
+                pred = 0.0
+                count = 0.0
+                for ui in rate_u:
+                    dev_ij, dev_count = dev[item_list.index(i)][item_list.index(ui)]
+                    pred += (rate_u.get(ui) - dev_ij) * dev_count
+                    count += dev_count
+                if count > 0:
+                    rec_u[i] = pred / count
+                else:
+                    rec_u[i] = 0.0
+        if n != -1:
+            items, pred = quick_sort(rec_u, r=True)
+            rec_u = {}
+            for i in range(n):
+                rec_u[items[i]] = pred[i]
         rec[u] = rec_u
     return rec
